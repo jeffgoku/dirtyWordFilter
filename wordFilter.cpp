@@ -162,7 +162,7 @@ bool checkEnds(const char *s, int startIdx, int depth)
 		return false;
 
 	SStrings *ss = (SStrings*)((char*)gWordFilterHandle.pHeader + cur->off);
-	short buf[16];
+	short buf[32];
 	memset(buf, 0, sizeof(buf));
 
 	char *startAddr = (char*)gWordFilterHandle.pHeader;

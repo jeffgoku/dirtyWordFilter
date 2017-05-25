@@ -22,7 +22,7 @@ void makeFilterFile(const char *fpath, const char *outfile)
 	std::set<short> endsInMiddle;
 	std::set<short> shownInMiddle;
 
-	boost::char_separator<char> charSep(", \r\n");
+	boost::char_separator<char> charSep(",\r\n");
 
 	std::ifstream inputFile(fpath, std::ios_base::binary);
 	if (!inputFile.is_open())
@@ -102,9 +102,10 @@ void makeFilterFile(const char *fpath, const char *outfile)
 					return;
 				}
 				jte.flags |= 1 << (i + 1);
-				if (i > 14)
+				if (i > sizeof(decltype(jte.flags)) * 8 - 2)
 				{
 					std::cout << "now the longest string can only be 14 characters long\n";
+					std::wcout << word << std::endl;
 					return;
 				}
 
@@ -138,9 +139,10 @@ void makeFilterFile(const char *fpath, const char *outfile)
 				SJumpTableEntry jte;
 				jte.charIndex = idxNext;
 				jte.flags = 1 << (i + 1);
-				if (i > 14)
+				if (i > sizeof(decltype(jte.flags))*8-2)
 				{
 					std::cout << "now the longest string can only be 14 characters long\n";
+					std::wcout << word << std::endl;
 					return;
 				}
 				if (i + 1 == n)
@@ -158,6 +160,11 @@ void makeFilterFile(const char *fpath, const char *outfile)
 					{
 						iter->second->push_back(word);
 					}
+					if (shownInMiddle.find(word[i + 1]) != shownInMiddle.end())
+						endsInMiddle.insert(word[i + 1]);
+				}
+				else {
+					shownInMiddle.insert(word[i + 1]);
 				}
 				(*jumpEntries[idx])[idxNext] = jte;
 			}
@@ -283,7 +290,7 @@ int main(int argc, char *argv[])
 	//makeFilterFile("aa.txt", "badWord.bytes");
 	initWordFilter("badWord.bytes");
 	//const char *text = "对对草泥马的fuck you日你哦";
-	const char *text = "毛茉莉花蚕泽东";
+	const char *text = "Hong Kong Herald.毛茉莉血腥镇x压花蚕泽东";
 	int ret = filterWord(text, strlen(text));
 	std::cout << ret;
 	return 0;

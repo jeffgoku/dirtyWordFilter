@@ -22,7 +22,8 @@ extern "C" {
 	struct SJumpTableEntry
 	{
 		short charIndex;
-		short flags; // hold which index the character can appear
+		short padding;
+		int flags; // hold which index the character can appear
 	};
 
 	struct SEndTable
