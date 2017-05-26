@@ -14,29 +14,29 @@ extern "C" {
 
 	struct SJumpTable
 	{
-		short nTotalEntries;
-		short entryOff;
-		short flags;  // hold weather the character can be the first character and weather the character can be a single character
+		unsigned short nTotalEntries;
+		unsigned short flags;  // hold weather the character can be the first character and weather the character can be a single character
+		unsigned entryOff;
 	};
 
 	struct SJumpTableEntry
 	{
-		short charIndex;
-		short padding;
+		unsigned short charIndex;
+		unsigned short padding;
 		int flags; // hold which index the character can appear
 	};
 
 	struct SEndTable
 	{
-		short charIndex;
-		short length;
+		unsigned short charIndex;
+		unsigned short length;
 		int off;
 	};
 
 	struct SStrings
 	{
 		int off;
-		short length;
+		unsigned short length;
 	};
 
 	struct SHeader
@@ -59,7 +59,7 @@ extern "C" {
 	DLLAPI void initWordFilterWithData(const char *data, int fsize);
 	DLLAPI void destroyWordFilter();
 	DLLAPI int filterWord(const char *str, int n);
-	DLLAPI short utf2unicode(const char *str, int *n);
+	DLLAPI unsigned short utf2unicode(const char *str, int *n);
 
 #ifdef __cplusplus
 }

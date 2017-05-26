@@ -2,6 +2,7 @@
 #include <vector>
 #include "wordFilter.h"
 #include <boost/tokenizer.hpp>
+#include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -14,13 +15,13 @@ void makeFilterFile(const char *fpath, const char *outfile)
 {
 	typedef boost::tokenizer<boost::char_separator<char>> TokenizerType;
 
-	std::map<short, int> wordIdxMap;
-	std::map<short, int> initialCharSet;
+	std::map<unsigned short, int> wordIdxMap;
+	std::map<unsigned short, int> initialCharSet;
 	std::map<std::wstring, int> words;
 
-	std::map<short, std::vector<std::wstring>*> endList;
-	std::set<short> endsInMiddle;
-	std::set<short> shownInMiddle;
+	std::map<unsigned short, std::vector<std::wstring>*> endList;
+	std::set<unsigned short> endsInMiddle;
+	std::set<unsigned short> shownInMiddle;
 
 	boost::char_separator<char> charSep(",\r\n");
 
@@ -52,15 +53,21 @@ void makeFilterFile(const char *fpath, const char *outfile)
 		for (int i = 0; i < n;)
 		{
 			int b;
-			short c = utf2unicode(pStr+i, &b);
-			wordIdxMap[c] = 0;
+			unsigned short c = utf2unicode(pStr+i, &b);
 			ws += c;
 			i += b;
+		}
+		boost::trim(ws);
+		if (ws.empty())
+			continue;
+		for (int i = 0; i < ws.size(); ++i)
+		{
+			wordIdxMap[ws[i]] = 0;
 		}
 		initialCharSet[ws[0]] |= (ws.size() == 1) | 0x2;
 		words[std::move(ws)] += 1;
 	}
-	std::vector<short> chars;
+	std::vector<unsigned short> chars;
 	for (auto iter : wordIdxMap) {
 		wordIdxMap[iter.first] = chars.size();
 		chars.push_back(iter.first);
@@ -171,6 +178,8 @@ void makeFilterFile(const char *fpath, const char *outfile)
 		}
 	}
 
+	std::cout << "single char count : " << singleCharCount << std::endl;
+
 	int n = 0;
 	/*
 	for (auto iter : endList) {
@@ -182,10 +191,10 @@ void makeFilterFile(const char *fpath, const char *outfile)
 	// sort using a custom function object
 	struct customComparar {
 	private:
-		const std::vector<short> &_chars;
+		const std::vector<unsigned short> &_chars;
 
 	public:
-		customComparar(std::vector<short> &chars): _chars(chars){}
+		customComparar(std::vector<unsigned short> &chars): _chars(chars){}
 		bool operator()(SJumpTableEntry &a, SJumpTableEntry &b)
 		{
 			return _chars[a.charIndex] < _chars[b.charIndex];
@@ -220,7 +229,7 @@ void makeFilterFile(const char *fpath, const char *outfile)
 	}
 	of.write((const char*)&allEntries[0], allEntries.size() * sizeof(SJumpTableEntry));
 
-	of.write((const char*)&chars[0], chars.size() * sizeof(short));
+	of.write((const char*)&chars[0], chars.size() * sizeof(unsigned short));
 	of.write((const char*)&jumpTables[0], jumpTables.size() * sizeof(SJumpTable));
 
 	off = of.tellp();
@@ -274,7 +283,7 @@ void makeFilterFile(const char *fpath, const char *outfile)
 	memcpy(buf, &n, 4); // char count
 	n = sizeof(SHeader) + allEntries.size() * sizeof(SJumpTableEntry);
 	memcpy(buf + 4, &n, 4);   // char offset
-	n += chars.size() * sizeof(short);
+	n += chars.size() * sizeof(unsigned short);
 	memcpy(buf + 8, &n, 4);  // jump table offset
 	memcpy(buf + 12, &endTableOff, 4);
 	memcpy(buf + 16, &i, 4);
@@ -287,11 +296,11 @@ void makeFilterFile(const char *fpath, const char *outfile)
 
 int main(int argc, char *argv[])
 {
-	//makeFilterFile("aa.txt", "badWord.bytes");
-	initWordFilter("badWord.bytes");
-	//const char *text = "对对草泥马的fuck you日你哦";
-	const char *text = "Hong Kong Herald.毛茉莉血腥镇x压花蚕泽东";
-	int ret = filterWord(text, strlen(text));
-	std::cout << ret;
+	makeFilterFile("aa.txt", "badWord.bytes");
+	//initWordFilter("badWord.bytes");
+	////const char *text = "对对草泥马的fuck you日你哦";
+	//const char *text = "Hong Kong Herald.茉莉血腥镇x压花蚕毛泽东";
+	//int ret = filterWord(text, strlen(text));
+	//std::cout << ret;
 	return 0;
 }

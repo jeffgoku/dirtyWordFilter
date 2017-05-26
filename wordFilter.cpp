@@ -76,9 +76,9 @@ SJumpTableEntry *getJumpTableEntry(int charIdx, int *n) {
 }
 
 static
-int searchChar(short c)
+int searchChar(unsigned short c)
 {
-	short *pChars = (short*)((char*)gWordFilterHandle.pHeader + gWordFilterHandle.pHeader->charOff);
+	unsigned short *pChars = (unsigned short*)((char*)gWordFilterHandle.pHeader + gWordFilterHandle.pHeader->charOff);
 	int nChars = gWordFilterHandle.pHeader->charCount;
 	int mid = nChars>>1;
 	int s = 0;
@@ -108,9 +108,9 @@ int searchChar(short c)
 }
 
 template<typename T>
-int searchCharIndirect(T *entries, int nEntries, short c, T **entry)
+int searchCharIndirect(T *entries, int nEntries, unsigned short c, T **entry)
 {
-	short *pChars = (short*)((char*)gWordFilterHandle.pHeader + gWordFilterHandle.pHeader->charOff);
+	unsigned short *pChars = (unsigned short*)((char*)gWordFilterHandle.pHeader + gWordFilterHandle.pHeader->charOff);
 	int s = 0, end = s + nEntries - 1;
 	int mid = s + (nEntries >> 1);
 	if (entry)
@@ -140,7 +140,7 @@ int searchCharIndirect(T *entries, int nEntries, short c, T **entry)
 }
 
 static
-int searchCharIndirect(SJumpTable *jumpTable, short c, int depth, SJumpTableEntry **entry)
+int searchCharIndirect(SJumpTable *jumpTable, unsigned short c, int depth, SJumpTableEntry **entry)
 {
 	SJumpTableEntry *entries = (SJumpTableEntry*)((char*)gWordFilterHandle.pHeader + jumpTable->entryOff);
 	int nEntries = jumpTable->nTotalEntries;
@@ -155,14 +155,14 @@ static
 bool checkEnds(const char *s, int startIdx, int depth)
 {
 	SEndTable *t = (SEndTable*)((char*)gWordFilterHandle.pHeader + gWordFilterHandle.pHeader->endTableOff);
-	short c = utf2unicode(s + startIdx, nullptr);
+	unsigned short c = utf2unicode(s + startIdx, nullptr);
 	SEndTable *cur;
 	int idx = searchCharIndirect<SEndTable>(t, gWordFilterHandle.pHeader->endTableLen, c, &cur);
 	if(idx == -1)
 		return false;
 
 	SStrings *ss = (SStrings*)((char*)gWordFilterHandle.pHeader + cur->off);
-	short buf[32];
+	unsigned short buf[32];
 	memset(buf, 0, sizeof(buf));
 
 	char *startAddr = (char*)gWordFilterHandle.pHeader;
@@ -177,7 +177,7 @@ bool checkEnds(const char *s, int startIdx, int depth)
 			break;
 
 		bool equal = true;
-		short *pStr = (short*)(startAddr + curs->off);
+		unsigned short *pStr = (unsigned short*)(startAddr + curs->off);
 		for (int j = depth - 1; j >= 0; --j)
 		{
 			if (buf[j] == 0)
@@ -198,7 +198,7 @@ bool checkEnds(const char *s, int startIdx, int depth)
 	return false;
 }
 
-short utf2unicode(const char *str, int *n)
+unsigned short utf2unicode(const char *str, int *n)
 {
 	char cur = *str;
 	if ((cur & 0x80) == 0)
